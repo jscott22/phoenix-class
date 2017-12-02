@@ -8,6 +8,7 @@
     <meta name="author" content="">
 
     <title>Hello Discuss!</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
@@ -19,6 +20,9 @@
         <a href="/" class="brand-logo">
           Discussions
         </a>
+        <ul class="right">
+          <%= display_auth_button(@conn) %>
+        </ul>
       </div>
     </nav>
 

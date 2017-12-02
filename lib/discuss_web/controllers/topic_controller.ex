@@ -12,39 +12,55 @@ defmodule DiscussWeb.TopicController do
   end
 
   def index(conn, _params) do
+    IO.inspect(conn.assigns)
     topics = Topics.list_topics()
     render(conn, "index.html", topics: topics)
   end
 
   def create(conn, %{"topic" => topic_params}) do
     case Topics.create_topic(topic_params) do
-      {:ok, topic} -> 
+      {:ok, _topic} -> 
         conn
-        |> put_status(:created)
-        |> put_resp_header("location", topic_path(conn, :show, topic))
-        |> render("show.json", topic: topic)
+        |> put_flash(:info, "Topic Created")
+        |> redirect(to: topic_path(conn, :index))
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    topic = Topics.get_topic!(id)
-    render(conn, "show.json", topic: topic)
+  def edit(conn, %{"id" => topic_id}) do
+    topic = Topics.get_topic!(topic_id)
+    changeset = Topic.changeset(topic)
+
+    render(conn, "edit.html", changeset: changeset, topic: topic)
   end
 
-  def update(conn, %{"id" => id, "topic" => topic_params}) do
-    topic = Topics.get_topic!(id)
+  def update(conn, %{"id" => topic_id, "topic" => topic}) do
+    old_topic = Topics.get_topic!(topic_id)
 
-    with {:ok, %Topic{} = topic} <- Topics.update_topic(topic, topic_params) do
-      render(conn, "show.json", topic: topic)
+    case Topics.update_topic(old_topic, topic) do
+      
+      {:ok, _topic} ->
+        conn
+        |> put_flash(:info, "Topic Updated")
+        |> redirect(to: topic_path(conn, :index))
+      {:error, changeset} ->
+        render(conn, "edit.html", changeset: changeset, topic: old_topic)
     end
   end
 
-  def delete(conn, %{"id" => id}) do
-    topic = Topics.get_topic!(id)
-    with {:ok, %Topic{}} <- Topics.delete_topic(topic) do
-      send_resp(conn, :no_content, "")
+  def delete(conn, %{"id" => topic_id}) do
+    old_topic = Topics.get_topic!(topic_id)
+
+    case Topics.delete_topic(old_topic) do
+      {:ok, _topic} ->
+        conn
+        |> put_flash(:info, "Topic Deleted")
+        |> redirect(to: topic_path(conn, :index))
+      {:error, _changeset} ->
+        render(conn, "index.html")
     end
+    
   end
+
 end
